@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script src="http://titiburomenkamera.saitama.jp/js/jquery.min.js"></script>
+	<script src="http://titiburomenkamera.saitama.jp/js/jquery.rwdImageMaps.min.js"></script>
+	<style>
+		img[usemap] {
+			border: none;
+			height: auto;
+			max-width: 100%;
+			width: auto;
+		}
+		.wrapper {
+			overflow: hidden;
+			min-width: 900px;
+			max-width: 1440px;
+		}
+		.main {
+			float: left;
+			width: 100%;
+			margin-right: -400px;
+			padding-right: 400px;
+			box-sizing: border-box;
+			position: relative;
+		}
+		.side {
+			float: left;
+			width: 400px;
+		}
+		.marker {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			background-color: rgba(255, 0, 0, 0.5);
+			border-radius: 50%;
+			pointer-events: none;
+			display: none;
+		}
+		.camera-list {
+			margin-top: 20px;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+		.camera-item {
+			width: 150px;
+			text-align: center;
+			border: 1px solid #ccc;
+			padding: 10px;
+			box-sizing: border-box;
+		}
+		.camera-item img {
+			width: 100%;
+			height: auto;
+		}
+		.area_style {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			background-color: red; /* 常に赤色で表示 */
+			border-radius: 50%;
+			transform: translate(-50%, -50%);
+			transition: background-color 0.2s ease; /* 色変化のスムーズさを追加 */
+		}
+		.area_style:hover {
+			background-color: blue; /* マウスオーバー時の色変更 */
+		}
+		.marker {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			background-color: red; /* 初期状態で赤色 */
+			border-radius: 50%;
+			transform: translate(-50%, -50%);
+			transition: background-color 0.2s ease; /* スムーズな色変化 */
+		}
+		.marker:hover {
+			background-color: blue; /* マウスオーバー時に青色 */
+		}
+		.camera-group {
+			margin-bottom: 3px;
+		}
+
+		.camera-group h2 {
+			font-size: 24px;
+			margin-bottom: 3px;
+			color: #333;
+			text-align: left;
+		}
+		.camera-items {
+			display: flex;
+			flex-wrap: wrap;
+			padding: 1px;
+			justify-content: space-around;
+			gap: 1px;
+		}
+		.camera-item {
+			flex: 1 1 calc(25% - 3px); /* 幅を3等分 */
+			width: 25%;
+			padding: 1px;
+			text-align: center;
+		}
+		.camera-image {
+			width: 100%;
+			height: auto;
+			max-height: 500px; /* 必要に応じて調整 */
+			object-fit: cover;
+			display: block;
+		}
+		.camera-location {
+			font-size: 14px;
+			color: #666;
+			margin-top: 2px;
+		}
+	</style>
+</head>
+<body>
+<div class="wrapper">
+	https://niigata.snow-livecam.com/
+	<div class="main">
+		<!-- <img src="http://titiburomenkamera.saitama.jp/material/map_202312.gif" width="1035" height="816" usemap="#titibumap" alt="" /> 
+		<img src="map.png" width="1035" height="816" usemap="#titibumap" alt="" />
+		-->
+		<div class="marker" id="marker"></div>
+		<map name="titibumap">
+			<!-- 秩父　http://titiburomenkamera.saitama.jp/video-default.php -->
+			<area shape="circle" coords="254,626,10" group="秩父エリア" data-location="一般国道140号 秩父市大滝地内(豆焼橋)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam9.jpg">
+			<area shape="circle" coords="261,581,10" group="秩父エリア" data-location="一般国道140号 秩父市大滝地内(黒文字橋)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam2.jpg">
+			<area shape="circle" coords="266,601,10" group="秩父エリア" data-location="一般国道140号 秩父市大滝地内(黒文字橋)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam3.jpg">
+			<area shape="circle" coords="309,565,10" group="秩父エリア" data-location="一般国道140号 秩父市大滝地内(川又)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam1.jpg">
+			<area shape="circle" coords="414,492,10" group="秩父エリア" data-location="一般国道140号 秩父市大滝地内(ループ橋:大滝大橋)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam8.jpg">
+			<area shape="circle" coords="414,492,10" group="秩父エリア" data-location="一般国道140号 秩父市大滝地内(ループ橋:大滝大橋)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam23.jpg">
+			<area shape="circle" coords="429,512,10" group="秩父エリア" data-location="一般国道140号 秩父市大滝地内(ループ橋:廿六木大橋)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam7.jpg">
+			<area shape="circle" coords="821,412,10" group="秩父エリア" data-location="一般国道140号 秩父市大滝地内(光岩トンネル)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam18.jpg">
+			<area shape="circle" coords="961,48,10" group="秩父エリア" data-location="一般国道140号 秩父市上野町地内(上野町交差点付近)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam4.jpg">
+			<area shape="circle" coords="790,315,10" group="秩父エリア" data-location="一般国道140号 長瀞町矢那瀬地内" href="http://titiburomenkamera.saitama.jp/image/Chic_cam21.jpg">
+			<area shape="circle" coords="817,282,10" group="秩父エリア" data-location="一般国道140号(皆野秩父バイパス) 蒔田大橋" href="http://titiburomenkamera.saitama.jp/image/Chic_cam22.jpg">
+			<area shape="circle" coords="311,243,10" group="秩父エリア" data-location="一般国道140号(皆野秩父バイパス) 蒔田トンネル" href="http://titiburomenkamera.saitama.jp/image/Chic_cam15.jpg">
+			<area shape="circle" coords="342,255,10" group="秩父エリア" data-location="一般国道299号 小鹿野町河原沢地内(志賀坂)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam6.jpg">
+			<area shape="circle" coords="743,376,10" group="秩父エリア" data-location="一般国道299号 小鹿野町河原沢地内(坂本)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam11.jpg">
+			<area shape="circle" coords="837,425,10" group="秩父エリア" data-location="一般国道299号 小鹿野町長留地内(千束峠)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam19.jpg">
+			<area shape="circle" coords="978,495,10" group="秩父エリア" data-location="一般国道299号 横瀬町横瀬地内(坂氷交差点付近)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam5.jpg">
+			<area shape="circle" coords="981,373,10" group="秩父エリア" data-location="一般国道299号 横瀬町芦ヶ久保地内(正丸トンネル出口付近)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam13.jpg">
+			<area shape="circle" coords="932,66,10" group="秩父エリア" data-location="主要地方道熊谷小川秩父線 秩父市定峰地内(定峰峠)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam12.jpg">
+			<area shape="circle" coords="736,443,10" group="秩父エリア" data-location="主要地方道長瀞玉淀自然公園線 長瀞町岩田地内(金尾峠)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam10.jpg">
+			<area shape="circle" coords="248,398,10" group="秩父エリア" data-location="一般県道小鹿野影森停車場線 秩父市久那地内(長尾根峠)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam14.jpg">
+			<area shape="circle" coords="312,489,10" group="秩父エリア" data-location="一般県道中津川三峰口停車場線 秩父市中津川地内(出合)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam16.jpg">
+			<area shape="circle" coords="345,495,10" group="秩父エリア" data-location="一般県道中津川三峰口停車場線 秩父市中津川地内(雷電三高山ﾄﾝﾈﾙ)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam17.jpg">
+			<area shape="circle" coords="496,604,10" group="秩父エリア" data-location="一般県道中津川三峰口停車場線 秩父市中津川地内(赤岩ﾄﾝﾈﾙ)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam20.jpg">
+			<area shape="circle" coords="569,547,10" group="秩父エリア" data-location="一般県道秩父多摩甲斐国立公園三峰線 秩父市三峰地内(三峯神社付近)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam24.jpg">
+			<area shape="circle" coords="478,438,10" group="秩父エリア" data-location="一般県道道薄小森線 小鹿野町両神小森地内(滝の沢橋)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam25.jpg">
+			<area shape="circle" coords="924,459,10" group="秩父エリア" data-location="一般国道299号 秩父郡横瀬町大字芦ヶ久保地内(道の駅あしがくぼ)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam26.jpg">
+			<area shape="circle" coords="781,400,10" group="秩父エリア" data-location="一般県道秩父停車場秩父公園線 秩父市秩父公園橋(寺尾方面)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam27.jpg">
+			<area shape="circle" coords="785,421,10" group="秩父エリア" data-location="一般県道秩父停車場秩父公園線 秩父市秩父公園橋(秩父駅方面)" href="http://titiburomenkamera.saitama.jp/image/Chic_cam28.jpg">
+			<!-- 甲府　https://www.ktr.mlit.go.jp/koufu/michi_camera/index.htm -->
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:山口" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/13/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:白州" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/12/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:武川" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/11/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:韮崎" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/10/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道52号:増穂(甲西道路)" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/14/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道52号:清水端" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/37/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道52号:箱原" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/24/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道52号:古屋敷" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/22/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道52号:相又" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/20/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道139号:精進" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/29/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道139号:本栖" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/28/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道52号:大和峠" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/19/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道52号:切久保" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/18/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道52号:万沢" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/16/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道138号:山中湖" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/26/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道138号:籠坂峠" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/27/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:勝沼" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/07/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:笹子" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/06/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:初狩" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/05/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道139号:田野倉" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/09/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:梁川" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/04/Camera.jpg">
+			<area shape="circle" coords="785,421,10" group="甲府エリア" data-location="国道20号:上野原" href="https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/01/Camera.jpg">
+			<!-- 群馬 https://www.kendobousai-gunma.jp/photo/ -->
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)145号 権現峠" href="https://www.kendobousai-gunma.jp/photo/snow/snow235.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(主)渋川下新田線 赤根トンネル" href="https://www.kendobousai-gunma.jp/photo/snow/snow234.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)120号 沼田ＩＣ" href="https://www.kendobousai-gunma.jp/photo/snow/snow225.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)120号 椎坂白沢トンネル沼田側" href="https://www.kendobousai-gunma.jp/photo/snow/snow333.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)120号 椎坂トンネル中間部" href="https://www.kendobousai-gunma.jp/photo/snow/snow332.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)120号 椎坂利根トンネル片品側" href="https://www.kendobousai-gunma.jp/photo/snow/snow331.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)120号 椎坂峠" href="https://www.kendobousai-gunma.jp/photo/snow/snow231.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)120号 大崖" href="https://www.kendobousai-gunma.jp/photo/snow/snow610.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)120号 丸沼入口" href="https://www.kendobousai-gunma.jp/photo/snow/snow244.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(一)上発知材木町線 迦葉山" href="https://www.kendobousai-gunma.jp/photo/snow/snow241.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(主)平川横塚線 川場" href="https://www.kendobousai-gunma.jp/photo/snow/snow242.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(主)平川横塚線 花咲" href="https://www.kendobousai-gunma.jp/photo/snow/snow243.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(主)沼田大間々線 根利" href="https://www.kendobousai-gunma.jp/photo/snow/snow245.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(国)291号 湯檜曽" href="https://www.kendobousai-gunma.jp/photo/snow/snow224.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(主)水上片品線 藤原" href="https://www.kendobousai-gunma.jp/photo/snow/snow232.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 利根沼田地域" data-location="(主)水上片品線 戸倉" href="https://www.kendobousai-gunma.jp/photo/snow/snow233.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)353号 四万" href="https://www.kendobousai-gunma.jp/photo/snow/snow214.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)145号(八ッ場ＢＰ) 雁ヶ沢ランプ" href="https://www.kendobousai-gunma.jp/photo/snow/snow213.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)145号(八ッ場ＢＰ) 川原畑アンダー" href="https://www.kendobousai-gunma.jp/photo/snow/snow412.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)145号(八ッ場ＢＰ) 林アンダー" href="https://www.kendobousai-gunma.jp/photo/snow/snow413.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(主)中之条草津線 暮坂峠東" href="https://www.kendobousai-gunma.jp/photo/snow/snow411.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)406号 須賀尾峠東" href="https://www.kendobousai-gunma.jp/photo/snow/snow409.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)292号 草津前口" href="https://www.kendobousai-gunma.jp/photo/snow/snow410.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)146号 峰の茶屋" href="https://www.kendobousai-gunma.jp/photo/snow/snow215.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)144号 大前須坂線交差点" href="https://www.kendobousai-gunma.jp/photo/snow/snow501.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(一)牧干俣線 万座ハイウェーとの交点" href="https://www.kendobousai-gunma.jp/photo/snow/snow502.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)292号 天狗山レストハウス" href="https://www.kendobousai-gunma.jp/photo/snow/snow504.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(一)大笹北軽井沢線 鬼押出ハイウェイ交差点" href="https://www.kendobousai-gunma.jp/photo/snow/snow505.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(国)146号 大笹北軽井沢線、長野原倉渕線" href="https://www.kendobousai-gunma.jp/photo/snow/snow506.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="(主)長野原倉渕線 二度上峠付近" href="https://www.kendobousai-gunma.jp/photo/snow/snow507.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="上信自動車道 岡崎IC" href="https://www.kendobousai-gunma.jp/photo/snow/snow608.jpg">
+			<area shape="circle" coords="785,421,10" group="群馬 吾妻地域" data-location="上信自動車道 箱島IC" href="https://www.kendobousai-gunma.jp/photo/snow/snow609.jpg">
+			<!-- 新潟 https://www.live-cam.pref.niigata.jp/ -->
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="南魚沼郡湯沢町三国三国" href="https://www.live-cam.pref.niigata.jp/camera/pc/932009.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="南魚沼郡湯沢町三国火打" href="https://www.live-cam.pref.niigata.jp/camera/pc/932501.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="南魚沼郡湯沢町三国萱付" href="https://www.live-cam.pref.niigata.jp/camera/pc/932502.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="南魚沼郡湯沢町三俣" href="https://www.live-cam.pref.niigata.jp/camera/pc/732507.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="南魚沼郡湯沢町神立" href="https://www.live-cam.pref.niigata.jp/camera/pc/932503.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="湯沢IC入口" href="https://www.live-cam.pref.niigata.jp/camera/pc/932008.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="南魚沼郡湯沢町神立奈良山" href="https://www.live-cam.pref.niigata.jp/camera/pc/932504.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="堀切" href="https://www.live-cam.pref.niigata.jp/camera/pc/932505.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="土樽" href="https://www.live-cam.pref.niigata.jp/camera/pc/cam_kanetu_tutitarubashi.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="湯沢" href="https://www.live-cam.pref.niigata.jp/camera/pc/cam_kanetu_yuzawabashi.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="関越トンネル ～ 湯沢IC" href="https://cdn-livecamera-pic.drivetraffic.jp/l/NYZ02.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="湯沢IC ～ 塩沢石打IC" href="https://cdn-livecamera-pic.drivetraffic.jp/l/NYZ03.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="六日町IC ～ 魚沼IC" href="https://cdn-livecamera-pic.drivetraffic.jp/l/NYZ04.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="堀之内IC" href="https://cdn-livecamera-pic.drivetraffic.jp/l/NYZ05.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="小千谷IC ～ 長岡IC" href="https://cdn-livecamera-pic.drivetraffic.jp/l/NNO03.jpg">
+			<area shape="circle" coords="785,421,10" group="新潟" data-location="水上IC ～ 関越トンネル" href="https://cdn-livecamera-pic.drivetraffic.jp/l/NYZ01.jpg">
+			<!-- 長野 https://www.ktr.mlit.go.jp/nagano/douroinfo/ -->
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="富士見町富士見下蔦木" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/215102_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="富士見町富士見瀬沢" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/215161_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="富士見町富士見神戸大橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/215156_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="茅野市ちの新井" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/215136_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="諏訪市四賀" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/044031_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="諏訪市四賀武津" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/215131_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="塩尻市旧塩尻東山" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/042039_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="塩尻市旧塩尻東山橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/211176_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 19号" data-location="長野市中御所" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/080221_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 19号" data-location="長野市今里" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/080246_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 19号" data-location="長野市小市洞門" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/210126_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 19号" data-location="篠ノ井山布施" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/209112_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 19号" data-location="長野市七二会大安寺橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/209106_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 19号" data-location="長野市信更町水篠橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/209106_L.jpg">			
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="信州新町下市場" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/208101_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="信州新町日原東" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/208146_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="信州新町日原西川口橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/210171_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="長野市大岡甲" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/208141_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="大町市八坂野平洞門" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/208116_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="生坂村雲根" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/211111_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="生坂村生坂トンネル" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/211141_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="安曇野市南陸郷" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/211156_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="安曇野市明科七貴木戸橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/211101_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 20号" data-location="松本市渚落合橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/211196_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="信濃町野尻赤川" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/080139_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="信濃町野尻貫の木" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/080196_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="飯綱町小玉" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/041019_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="飯綱町倉井" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/080186_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="長野市豊野町川谷" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/080176_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="長野市赤沼" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/021002_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="長野市東和田" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/021010_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="長野市青木島大塚" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/080126_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="長野市稲葉母袋高架橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/080128_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="長野市篠ノ井橋" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214126_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="千曲市粟佐" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/021018_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="千曲市戸倉" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214121_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="坂城町坂城" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214116_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="上田市上塩尻" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214106_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="上田市常磐城" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214101_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="東御市滋野" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214131_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="御代田町馬瀬口" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214146_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="軽井沢追分" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214136_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="軽井沢町鳥井原" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214151_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 18号" data-location="軽井沢町長倉" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/214141_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 中部横断自動車道" data-location="佐久中佐京都IC" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/045012_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 中部横断自動車道" data-location="佐久南IC" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/045065_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 中部横断自動車道" data-location="佐久臼田IC" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/045073_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 中部横断自動車道" data-location="佐久穂IC" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/045079_L.jpg">
+			<area shape="circle" coords="785,421,10" group="長野 中部横断自動車道" data-location="八千穂高原IC" href="https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/045085_L.jpg">
+		</map>
+	</div>
+	<!--
+	<div class="side">
+		<img src="http://titiburomenkamera.saitama.jp/material/pic_area.jpg" width="400" height="300" id="p_area">
+	</div>
+	-->
+</div>
+<div class="camera-list" id="cameraList"></div>
+
+<script>
+	$(document).ready(function() {
+		$('img[usemap]').rwdImageMaps();
+
+		// カメラ一覧を生成
+		const $cameraList = $('#cameraList');
+		const groupedCameras = {};
+
+		// area 要素をループしてグループ化
+		$('area').each(function() {
+			const area = $(this);
+			const group = area.attr('group') || 'その他';
+			const location = area.data('location');
+			const href = area.attr('href');
+			const alt = area.attr('alt');
+
+			// グループごとに配列を初期化
+			if (!groupedCameras[group]) {
+				groupedCameras[group] = [];
+			}
+
+			// グループにカメラインフォメーションを追加
+			groupedCameras[group].push({ href, alt, location });
+		});
+
+		// グループごとに表示
+		Object.keys(groupedCameras).forEach(group => {
+			const groupSection = `
+				<div class="camera-group">
+					<h2>${group}</h2>
+					<div class="camera-items">
+						${groupedCameras[group].map(camera => `
+							<div class="camera-item">
+								<img src="${camera.href}" alt="${camera.alt}" class="camera-image"/>
+								<p class="camera-location">${camera.location || camera.alt}</p>
+							</div>
+						`).join('')}
+					</div>
+				</div>
+			`;
+			$cameraList.append(groupSection);
+		});
+
+		const $wrapper = $(".wrapper");
+
+		// すべての<area>タグからマーカーを生成
+		$("area").each(function (index) {
+			const coords = $(this).attr("coords").split(",");
+			const x = parseInt(coords[0], 10);
+			const y = parseInt(coords[1], 10);
+
+			// マーカーを生成
+			const $marker = $("<div>")
+				.addClass("marker")
+				.css({ left: `${x}px`, top: `${y}px` })
+				.attr("data-index", index);
+
+			// マーカーをクリック時、リンク先に遷移
+			$marker.on("click", () => {
+				window.location.href = $(this).attr("href");
+			});
+
+			// マーカーをwrapper内に追加
+			$wrapper.append($marker);
+		});
+
+		// マウスオーバーでプレビュー画像変更
+		$("area").on("mouseover", function () {
+			$("#p_area").attr("src", $(this).attr("href"));
+		});
+
+		$("area").on("mouseout", function () {
+			$("#p_area").attr("src", "http://titiburomenkamera.saitama.jp/material/pic_area.jpg");
+		});
+	});
+</script>
+</body>
+</html>
